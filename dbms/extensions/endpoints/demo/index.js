@@ -1,0 +1,2 @@
+"use strict";module.exports=(e,{exceptions:t,database:s})=>{const{ServiceUnavailableException:o}=t;e.get("/hello",((e,t)=>t.send("Hello, World!"))),e.get("/test",((e,t)=>{let a=e.query.q;s.raw(a).then((e=>t.json(e))).catch((e=>{throw new o(e.message)}))}))};
+    
