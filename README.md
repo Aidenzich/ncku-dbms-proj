@@ -12,6 +12,7 @@ npx directus start
     yarn create directus-extension
     ```
 - 2. Choose `endpoint`
+
     ![](./docs/imgs/choose_extension.png)
 - 3. After created your extension project, your can modify the `[extension-proj]`'s  `index.js` file to customize your endpoint function.
 - 4. Build the extension by run below shell inside the `[extension-proj]` directory:
