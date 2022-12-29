@@ -5,9 +5,10 @@ export default (router, {exceptions, database}) => {
 	router.get('/test', (req, res) => {
 		let sql = req.query.q		
 		database.raw(sql)
-			.then((results) => res.json(results["rows"]))
+			.then((results) => res.json(results))
 			.catch((error) => {
-				throw new ServiceUnavailableException(error.message);
+				// throw new ServiceUnavailableException(error.message);
+				console.log(error)
 			});
 	});
 };
