@@ -5,7 +5,7 @@ export default (router, {exceptions, database}) => {
 	router.get('/test', (req, res) => {
 		let sql = req.query.q		
 		database.raw(sql)
-			.then((results) => res.json(results))
+			.then((results) => res.json(results["rows"]))
 			.catch((error) => {
 				throw new ServiceUnavailableException(error.message);
 			});
