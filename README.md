@@ -1,6 +1,4 @@
 # DBMS Final Project
-姓名 葉家任
-學號 VS6102093
 ## Quick Start
 ```bash
 docker compose up -d
