@@ -7,11 +7,11 @@ services:
     image: postgis/postgis:13-3.1-alpine
     environment:
       POSTGRES_PASSWORD: secret      
-      # POSTGRES_DB: directus
+      POSTGRES_DB: directus
     ports:
       - 5432:5432
     volumes:
-      - ./dummy_dump.sql:/docker-entrypoint-initdb.d/dummy_dump.sql
+      - .sql/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 30s
@@ -21,12 +21,12 @@ services:
     image: directus/directus:latest
     ports:
       - 8055:8055
-    env_file: ./dbms/.env
+    env_file: ./backend/.env
     depends_on:
       database:
         condition: service_healthy
     links:
       - database
     volumes:
-      - ./dbms/extensions/:/directus/extensions/
-      - ./dbms/uploads:/directus/uploads
+      - ./backend/extensions/:/directus/extensions/
+      - ./backend/uploads:/directus/uploads

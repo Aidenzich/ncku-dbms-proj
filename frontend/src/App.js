@@ -61,12 +61,12 @@ function App() {
       "desp": "Despcrition"
     },
     "having":{
-      "sql": "SELECT name FROM patients GROUP BY name HAVING age < 20",
+      "sql": "SELECT name, gender FROM patients GROUP BY name, gender HAVING gender='F'",
       "desp": "Despcrition"
     }
   })
 
-  var requestOptions = {
+  let requestOptions = {
     method: 'GET',
     redirect: 'follow'
   };
@@ -81,9 +81,10 @@ function App() {
 
   const handleSelect= (e)=>{    
     if (e !== '') {
-      console.log(e)
+      
       setSelectedCommand(e)      
-      var query = commands2Sql[e]["sql"]
+      let query = commands2Sql[e]["sql"]
+      
       setData([]);
       fetch("http://0.0.0.0:8055/demo/test?q="+query, requestOptions)
       .then(response => response.text())
@@ -110,33 +111,33 @@ function App() {
         </DropdownButton>
         {(selectedCommand !== '')?
           <>
-            <h4>You selected {selectedCommand}</h4>
-            <h4>Your query related to {queryRows} row.</h4>
-            <h6> {commands2Sql[selectedCommand]["sql"]}</h6>
-            <div style={{width:"1000px", overflow:"scroll"}}>
+            <h4>You selected <font color='orange'>{selectedCommand}</font></h4>
+            <h5><font color='cyan'>{commands2Sql[selectedCommand]["sql"]}</font></h5>
+            <h6>Your query related to {queryRows} row.</h6>                        
               { (data.length > 0)?<>
-                <Table striped bordered hover variant="dark" responsive="sm">
-                  <thead>
-                    <tr>
-                      {Object.keys(data[0]).map((column_name, idx)=>{
-                        return <th key={idx}>{column_name}</th>
-                      })}                  
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.map((row, i)=>{
-                      return <>
-                        <tr>
+                <div style={{width:"1000px", overflowX:"scroll"}}>
+                  <Table striped bordered hover variant="dark" responsive="sm">
+                    <thead>
+                      <tr>
                         {Object.keys(data[0]).map((column_name, idx)=>{
-                          return <th>{row[column_name]}</th>
-                        })}                       
-                        </tr>
-                      </>
-                    }) }                
-                  </tbody>
-                </Table>
-              </>: null }
-            </div>
+                          return <th key={idx}>{column_name}</th>
+                        })}                  
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {data.map((row, i)=>{
+                        return <>
+                          <tr>
+                          {Object.keys(data[0]).map((column_name, idx)=>{
+                            return <th>{row[column_name]}</th>
+                          })}                       
+                          </tr>
+                        </>
+                      }) }                
+                    </tbody>
+                  </Table>
+                </div>
+              </>: null }            
           </>
           :
           <></>

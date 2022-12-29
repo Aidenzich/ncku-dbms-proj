@@ -17,93 +17,19 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Name: tiger; Type: SCHEMA; Schema: -; Owner: postgres
+-- Name: public; Type: SCHEMA; Schema: -; Owner: postgres
 --
 
-CREATE SCHEMA tiger;
+-- CREATE SCHEMA public;
 
 
-ALTER SCHEMA tiger OWNER TO postgres;
-
---
--- Name: tiger_data; Type: SCHEMA; Schema: -; Owner: postgres
---
-
-CREATE SCHEMA tiger_data;
-
-
-ALTER SCHEMA tiger_data OWNER TO postgres;
+ALTER SCHEMA public OWNER TO postgres;
 
 --
--- Name: topology; Type: SCHEMA; Schema: -; Owner: postgres
+-- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: postgres
 --
 
-CREATE SCHEMA topology;
-
-
-ALTER SCHEMA topology OWNER TO postgres;
-
---
--- Name: SCHEMA topology; Type: COMMENT; Schema: -; Owner: postgres
---
-
-COMMENT ON SCHEMA topology IS 'PostGIS Topology schema';
-
-
---
--- Name: fuzzystrmatch; Type: EXTENSION; Schema: -; Owner: -
---
-
-CREATE EXTENSION IF NOT EXISTS fuzzystrmatch WITH SCHEMA public;
-
-
---
--- Name: EXTENSION fuzzystrmatch; Type: COMMENT; Schema: -; Owner: 
---
-
-COMMENT ON EXTENSION fuzzystrmatch IS 'determine similarities and distance between strings';
-
-
---
--- Name: postgis; Type: EXTENSION; Schema: -; Owner: -
---
-
-CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;
-
-
---
--- Name: EXTENSION postgis; Type: COMMENT; Schema: -; Owner: 
---
-
-COMMENT ON EXTENSION postgis IS 'PostGIS geometry and geography spatial types and functions';
-
-
---
--- Name: postgis_tiger_geocoder; Type: EXTENSION; Schema: -; Owner: -
---
-
-CREATE EXTENSION IF NOT EXISTS postgis_tiger_geocoder WITH SCHEMA tiger;
-
-
---
--- Name: EXTENSION postgis_tiger_geocoder; Type: COMMENT; Schema: -; Owner: 
---
-
-COMMENT ON EXTENSION postgis_tiger_geocoder IS 'PostGIS tiger geocoder and reverse geocoder';
-
-
---
--- Name: postgis_topology; Type: EXTENSION; Schema: -; Owner: -
---
-
-CREATE EXTENSION IF NOT EXISTS postgis_topology WITH SCHEMA topology;
-
-
---
--- Name: EXTENSION postgis_topology; Type: COMMENT; Schema: -; Owner: 
---
-
-COMMENT ON EXTENSION postgis_topology IS 'PostGIS topology spatial types and functions';
+COMMENT ON SCHEMA public IS 'standard public schema';
 
 
 SET default_tablespace = '';
@@ -769,17 +695,11 @@ ALTER SEQUENCE public.directus_webhooks_id_seq OWNED BY public.directus_webhooks
 --
 
 CREATE TABLE public.doctors (
-    doctor_id bigint NOT NULL,
-    status character varying(255) DEFAULT 'draft'::character varying NOT NULL,
-    user_created uuid,
-    date_created timestamp with time zone,
-    user_updated uuid,
-    date_updated timestamp with time zone,
-    age integer,
-    contact_info text,
-    name character varying(255),
-    gender integer DEFAULT 0,
-    profile uuid
+    doctor_id integer NOT NULL,
+    name text NOT NULL,
+    gender character(1) NOT NULL,
+    age integer NOT NULL,
+    contact_info text
 );
 
 
@@ -790,6 +710,7 @@ ALTER TABLE public.doctors OWNER TO postgres;
 --
 
 CREATE SEQUENCE public.doctors_doctor_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -804,6 +725,82 @@ ALTER TABLE public.doctors_doctor_id_seq OWNER TO postgres;
 --
 
 ALTER SEQUENCE public.doctors_doctor_id_seq OWNED BY public.doctors.doctor_id;
+
+
+--
+-- Name: drug_stocks; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.drug_stocks (
+    drug_id integer NOT NULL,
+    drug_name text NOT NULL,
+    quantity integer NOT NULL,
+    price real NOT NULL,
+    batch_number text NOT NULL,
+    expiration_date date NOT NULL
+);
+
+
+ALTER TABLE public.drug_stocks OWNER TO postgres;
+
+--
+-- Name: drug_stocks_drug_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.drug_stocks_drug_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.drug_stocks_drug_id_seq OWNER TO postgres;
+
+--
+-- Name: drug_stocks_drug_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.drug_stocks_drug_id_seq OWNED BY public.drug_stocks.drug_id;
+
+
+--
+-- Name: medical_records; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.medical_records (
+    record_id integer NOT NULL,
+    patient_id integer,
+    doctor_id integer,
+    diagnosis text NOT NULL,
+    treatment_plan text NOT NULL,
+    date_created timestamp with time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+
+ALTER TABLE public.medical_records OWNER TO postgres;
+
+--
+-- Name: medical_records_record_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.medical_records_record_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.medical_records_record_id_seq OWNER TO postgres;
+
+--
+-- Name: medical_records_record_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.medical_records_record_id_seq OWNED BY public.medical_records.record_id;
 
 
 --
@@ -844,50 +841,12 @@ ALTER SEQUENCE public.patients_patient_id_seq OWNED BY public.patients.patient_i
 
 
 --
--- Name: pharmacist; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.pharmacist (
-    pharmacist_id integer NOT NULL,
-    name text NOT NULL,
-    gender character(1) NOT NULL,
-    age integer NOT NULL,
-    contact_info text,
-    pp uuid
-);
-
-
-ALTER TABLE public.pharmacist OWNER TO postgres;
-
---
--- Name: pharmacist_pharmacist_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.pharmacist_pharmacist_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.pharmacist_pharmacist_id_seq OWNER TO postgres;
-
---
--- Name: pharmacist_pharmacist_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.pharmacist_pharmacist_id_seq OWNED BY public.pharmacist.pharmacist_id;
-
-
---
 -- Name: prescriptions; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.prescriptions (
     prescription_id integer NOT NULL,
-    patient_id integer NOT NULL,
+    patient_id integer,
     drug_name text NOT NULL,
     dosage real NOT NULL,
     frequency text NOT NULL,
@@ -917,6 +876,44 @@ ALTER TABLE public.prescriptions_prescription_id_seq OWNER TO postgres;
 --
 
 ALTER SEQUENCE public.prescriptions_prescription_id_seq OWNED BY public.prescriptions.prescription_id;
+
+
+--
+-- Name: sales; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.sales (
+    sale_id integer NOT NULL,
+    drug_id integer,
+    quantity integer NOT NULL,
+    price real NOT NULL,
+    total_amount real NOT NULL,
+    date_created timestamp with time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+
+ALTER TABLE public.sales OWNER TO postgres;
+
+--
+-- Name: sales_sale_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.sales_sale_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.sales_sale_id_seq OWNER TO postgres;
+
+--
+-- Name: sales_sale_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.sales_sale_id_seq OWNED BY public.sales.sale_id;
 
 
 --
@@ -990,6 +987,20 @@ ALTER TABLE ONLY public.doctors ALTER COLUMN doctor_id SET DEFAULT nextval('publ
 
 
 --
+-- Name: drug_stocks drug_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.drug_stocks ALTER COLUMN drug_id SET DEFAULT nextval('public.drug_stocks_drug_id_seq'::regclass);
+
+
+--
+-- Name: medical_records record_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.medical_records ALTER COLUMN record_id SET DEFAULT nextval('public.medical_records_record_id_seq'::regclass);
+
+
+--
 -- Name: patients patient_id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -997,17 +1008,17 @@ ALTER TABLE ONLY public.patients ALTER COLUMN patient_id SET DEFAULT nextval('pu
 
 
 --
--- Name: pharmacist pharmacist_id; Type: DEFAULT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.pharmacist ALTER COLUMN pharmacist_id SET DEFAULT nextval('public.pharmacist_pharmacist_id_seq'::regclass);
-
-
---
 -- Name: prescriptions prescription_id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.prescriptions ALTER COLUMN prescription_id SET DEFAULT nextval('public.prescriptions_prescription_id_seq'::regclass);
+
+
+--
+-- Name: sales sale_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.sales ALTER COLUMN sale_id SET DEFAULT nextval('public.sales_sale_id_seq'::regclass);
 
 
 --
@@ -1091,16 +1102,11 @@ COPY public.directus_activity (id, action, "user", "timestamp", ip, user_agent, 
 80	create	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 09:18:41.271+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_fields	32	\N	http://0.0.0.0:8055
 81	update	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 09:18:57.707+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_collections	doctors	\N	http://0.0.0.0:8055
 82	create	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 09:20:25.646+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_fields	33	\N	http://0.0.0.0:8055
-83	create	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 09:22:01.38+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	doctors	1	\N	http://0.0.0.0:8055
 84	create	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 09:24:38.316+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_permissions	4	\N	http://0.0.0.0:8055
 85	create	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 09:24:40.109+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_permissions	5	\N	http://0.0.0.0:8055
-86	create	\N	2022-12-25 09:24:42.751+00	127.0.0.1	PostmanRuntime/7.30.0	doctors	2	\N	\N
-87	update	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 09:25:01.622+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	doctors	2	\N	http://0.0.0.0:8055
 88	create	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 09:26:27.985+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_fields	34	\N	http://0.0.0.0:8055
-89	update	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 09:26:36.513+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	doctors	2	\N	http://0.0.0.0:8055
 90	create	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 09:28:49.843+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_files	867bceb2-8601-42a5-9688-965ee6c9f0bc	\N	http://0.0.0.0:8055
 91	create	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 09:29:19.4+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_fields	35	\N	http://0.0.0.0:8055
-92	update	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 09:29:37.332+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	doctors	1	\N	http://0.0.0.0:8055
 93	create	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 09:31:12.244+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_settings	1	\N	http://0.0.0.0:8055
 94	create	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 09:32:10.909+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_files	47e75f64-540b-4e02-aec7-d679cf109cc0	\N	http://0.0.0.0:8055
 95	update	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 09:32:29.026+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_settings	1	\N	http://0.0.0.0:8055
@@ -1114,8 +1120,6 @@ COPY public.directus_activity (id, action, "user", "timestamp", ip, user_agent, 
 103	create	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 09:49:34.858+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_fields	38	\N	http://0.0.0.0:8055
 104	create	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 09:49:37.557+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_fields	39	\N	http://0.0.0.0:8055
 105	create	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 09:49:53.65+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_fields	40	\N	http://0.0.0.0:8055
-106	create	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 09:50:26.709+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	patients	1	\N	http://0.0.0.0:8055
-107	delete	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 09:50:38.152+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	patients	1	\N	http://0.0.0.0:8055
 108	update	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 09:53:51.334+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_fields	39	\N	http://0.0.0.0:8055
 109	update	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 09:56:02.379+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_settings	1	\N	http://0.0.0.0:8055
 110	create	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 09:58:11.387+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_collections	pharmacist	\N	http://0.0.0.0:8055
@@ -1125,7 +1129,6 @@ COPY public.directus_activity (id, action, "user", "timestamp", ip, user_agent, 
 114	create	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 09:58:34.21+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_fields	43	\N	http://0.0.0.0:8055
 115	create	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 09:58:37.96+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_fields	44	\N	http://0.0.0.0:8055
 116	create	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 09:58:40.66+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_fields	45	\N	http://0.0.0.0:8055
-117	create	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 10:02:23.79+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	pharmacist	1	\N	http://0.0.0.0:8055
 118	create	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 10:05:32.497+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_permissions	6	\N	http://0.0.0.0:8055
 119	create	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 10:05:33.436+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_permissions	7	\N	http://0.0.0.0:8055
 120	create	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 10:05:34.555+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_permissions	8	\N	http://0.0.0.0:8055
@@ -1153,11 +1156,8 @@ COPY public.directus_activity (id, action, "user", "timestamp", ip, user_agent, 
 142	update	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 10:28:20.736+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_fields	33	\N	http://0.0.0.0:8055
 143	update	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 10:28:20.962+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_fields	34	\N	http://0.0.0.0:8055
 144	update	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 10:28:21.186+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_fields	35	\N	http://0.0.0.0:8055
-145	create	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 10:29:32.91+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	patients	2	\N	http://0.0.0.0:8055
-146	create	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 10:30:36.586+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	prescriptions	1	\N	http://0.0.0.0:8055
 147	update	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 10:31:35.155+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_fields	47	\N	http://0.0.0.0:8055
 148	update	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 10:38:09.093+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_fields	47	\N	http://0.0.0.0:8055
-149	update	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 10:38:35.417+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	prescriptions	1	\N	http://0.0.0.0:8055
 150	update	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 10:38:50.953+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_fields	47	\N	http://0.0.0.0:8055
 151	update	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 11:16:47.325+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_fields	47	\N	http://0.0.0.0:8055
 152	update	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 11:17:32.532+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_fields	47	\N	http://0.0.0.0:8055
@@ -1207,14 +1207,12 @@ COPY public.directus_activity (id, action, "user", "timestamp", ip, user_agent, 
 196	create	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 11:45:26.3+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_permissions	36	\N	http://0.0.0.0:8055
 197	create	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 11:45:27.353+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_permissions	37	\N	http://0.0.0.0:8055
 198	create	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 11:48:40.49+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_fields	53	\N	http://0.0.0.0:8055
-199	update	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 11:49:05.631+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	pharmacist	1	\N	http://0.0.0.0:8055
 200	create	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 11:58:00.705+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_permissions	38	\N	http://0.0.0.0:8055
 201	update	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 11:58:33.5+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_permissions	38	\N	http://0.0.0.0:8055
 202	delete	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 12:00:06.693+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_permissions	38	\N	http://0.0.0.0:8055
 203	update	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 12:09:19.603+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_collections	prescriptions	\N	http://0.0.0.0:8055
 204	update	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 12:14:44.751+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_fields	47	\N	http://0.0.0.0:8055
 205	update	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 12:23:54.038+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_collections	prescriptions	\N	http://0.0.0.0:8055
-206	update	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 12:24:16.022+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	prescriptions	1	\N	http://0.0.0.0:8055
 207	update	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 12:26:39.212+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_settings	1	\N	http://0.0.0.0:8055
 208	update	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 12:31:12.05+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_fields	47	\N	http://0.0.0.0:8055
 209	update	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 12:31:16.716+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_fields	47	\N	http://0.0.0.0:8055
@@ -1227,6 +1225,11 @@ COPY public.directus_activity (id, action, "user", "timestamp", ip, user_agent, 
 216	update	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 12:38:31.222+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_fields	39	\N	http://0.0.0.0:8055
 217	update	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 12:42:50.09+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_fields	39	\N	http://0.0.0.0:8055
 218	update	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 12:49:03.038+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_fields	39	\N	http://0.0.0.0:8055
+219	login	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-29 10:48:52.361+00	172.21.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_users	b76f063d-86b5-421a-b985-6f4e0885eb66	\N	http://0.0.0.0:8055
+220	delete	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-29 10:49:01.777+00	172.21.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_collections	doctors	\N	http://0.0.0.0:8055
+221	delete	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-29 10:49:10.372+00	172.21.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_collections	prescriptions	\N	http://0.0.0.0:8055
+222	delete	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-29 10:49:13.064+00	172.21.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_collections	pharmacist	\N	http://0.0.0.0:8055
+223	delete	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-29 10:49:16.151+00	172.21.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	directus_collections	patients	\N	http://0.0.0.0:8055
 \.
 
 
@@ -1235,10 +1238,6 @@ COPY public.directus_activity (id, action, "user", "timestamp", ip, user_agent, 
 --
 
 COPY public.directus_collections (collection, icon, note, display_template, hidden, singleton, translations, archive_field, archive_app_filter, archive_value, unarchive_value, sort_field, accountability, color, item_duplication_fields, sort, "group", collapse) FROM stdin;
-doctors	\N	\N	\N	f	f	\N	status	t	archived	draft	\N	activity	\N	\N	\N	\N	open
-patients	\N	\N	\N	f	f	\N	\N	t	\N	\N	\N	all	\N	\N	\N	\N	open
-pharmacist	\N	\N	\N	f	f	\N	\N	t	\N	\N	\N	all	\N	\N	\N	\N	open
-prescriptions	\N	\N	{{patient_id}}{{prescription_id}}	f	f	\N	\N	t	\N	\N	\N	all	\N	["patient_id"]	\N	\N	open
 \.
 
 
@@ -1255,35 +1254,7 @@ COPY public.directus_dashboards (id, name, icon, note, date_created, user_create
 --
 
 COPY public.directus_fields (id, collection, field, special, interface, options, display, display_options, readonly, hidden, sort, width, translations, note, conditions, required, "group", validation, validation_message) FROM stdin;
-31	doctors	age	\N	input	\N	\N	\N	f	f	8	full	\N	\N	\N	t	\N	\N	\N
 23	test_collection	tc_id	\N	input	\N	\N	\N	t	t	\N	full	\N	\N	\N	f	\N	\N	\N
-33	doctors	name	\N	input	\N	\N	\N	f	f	9	full	\N	\N	\N	t	\N	\N	\N
-34	doctors	gender	\N	select-dropdown	{"choices":[{"text":"man","value":0},{"text":"woman","value":1},{"text":"other","value":2}]}	\N	\N	f	f	10	full	\N	\N	\N	f	\N	\N	\N
-35	doctors	profile	file	file-image	\N	\N	\N	f	f	11	full	\N	\N	\N	f	\N	\N	\N
-36	patients	patient_id	\N	\N	\N	\N	\N	t	t	\N	full	\N	\N	\N	f	\N	\N	\N
-37	patients	age	\N	\N	\N	\N	\N	f	f	\N	full	\N	\N	\N	f	\N	\N	\N
-38	patients	name	\N	\N	\N	\N	\N	f	f	\N	full	\N	\N	\N	f	\N	\N	\N
-40	patients	contact_info	\N	\N	\N	\N	\N	f	f	\N	full	\N	\N	\N	f	\N	\N	\N
-41	pharmacist	pharmacist_id	\N	\N	\N	\N	\N	t	t	\N	full	\N	\N	\N	f	\N	\N	\N
-42	pharmacist	name	\N	\N	\N	\N	\N	f	f	\N	full	\N	\N	\N	f	\N	\N	\N
-43	pharmacist	gender	\N	\N	\N	\N	\N	f	f	\N	full	\N	\N	\N	f	\N	\N	\N
-44	pharmacist	age	\N	\N	\N	\N	\N	f	f	\N	full	\N	\N	\N	f	\N	\N	\N
-45	pharmacist	contact_info	\N	\N	\N	\N	\N	f	f	\N	full	\N	\N	\N	f	\N	\N	\N
-50	prescriptions	dosage	\N	\N	\N	\N	\N	f	f	\N	full	\N	\N	\N	f	\N	\N	\N
-51	prescriptions	frequency	\N	\N	\N	\N	\N	f	f	\N	full	\N	\N	\N	f	\N	\N	\N
-52	prescriptions	date_created	\N	\N	\N	\N	\N	f	f	\N	full	\N	\N	\N	f	\N	\N	\N
-24	doctors	doctor_id	\N	input	\N	\N	\N	t	t	1	full	\N	\N	\N	f	\N	\N	\N
-25	doctors	status	\N	select-dropdown	{"choices":[{"text":"$t:published","value":"published"},{"text":"$t:draft","value":"draft"},{"text":"$t:archived","value":"archived"}]}	labels	{"showAsDot":true,"choices":[{"text":"$t:published","value":"published","foreground":"#FFFFFF","background":"var(--primary)"},{"text":"$t:draft","value":"draft","foreground":"#18222F","background":"#D3DAE4"},{"text":"$t:archived","value":"archived","foreground":"#FFFFFF","background":"var(--warning)"}]}	f	f	2	full	\N	\N	\N	f	\N	\N	\N
-26	doctors	user_created	user-created	select-dropdown-m2o	{"template":"{{avatar.$thumbnail}} {{first_name}} {{last_name}}"}	user	\N	t	t	3	half	\N	\N	\N	f	\N	\N	\N
-27	doctors	date_created	date-created	datetime	\N	datetime	{"relative":true}	t	t	4	half	\N	\N	\N	f	\N	\N	\N
-28	doctors	user_updated	user-updated	select-dropdown-m2o	{"template":"{{avatar.$thumbnail}} {{first_name}} {{last_name}}"}	user	\N	t	t	5	half	\N	\N	\N	f	\N	\N	\N
-29	doctors	date_updated	date-updated	datetime	\N	datetime	{"relative":true}	t	t	6	half	\N	\N	\N	f	\N	\N	\N
-32	doctors	contact_info	\N	input-multiline	\N	\N	\N	f	f	7	full	\N	\N	\N	f	\N	\N	\N
-53	pharmacist	pp	m2o	select-dropdown-m2o	{"choices":null,"filter":{"_and":[{"role":{"name":{"_contains":"Pharmacist"}}}]}}	\N	\N	f	f	\N	full	\N	\N	\N	f	\N	\N	\N
-46	prescriptions	prescription_id	\N	\N	\N	\N	\N	t	t	\N	half	\N	\N	\N	f	\N	\N	\N
-49	prescriptions	drug_name	\N	\N	\N	\N	\N	f	f	\N	half	\N	\N	\N	f	\N	\N	\N
-47	prescriptions	patient_id	\N	select-dropdown-m2o	{"template":" {{name}} {{contact_info}}"}	related-values	{"template":"{{name}} {{contact_info}} "}	f	f	\N	full	\N	\N	\N	f	\N	\N	\N
-39	patients	gender	\N	select-dropdown	{"choices":[{"text":"man","value":"0"},{"text":"woman","value":"1"},{"text":"other","value":"2"}]}	labels	{"choices":[{"text":"man","value":"0"},{"text":"woman","value":"1"},{"text":"other","value":"2"}],"format":true}	f	f	\N	full	\N	\N	\N	f	\N	\N	\N
 \.
 
 
@@ -1413,12 +1384,6 @@ COPY public.directus_panels (id, dashboard, name, icon, color, show_header, note
 --
 
 COPY public.directus_permissions (id, role, collection, action, permissions, validation, presets, fields) FROM stdin;
-4	\N	doctors	read	{}	{}	\N	*
-5	\N	doctors	create	{}	{}	\N	*
-6	\N	patients	read	{}	{}	\N	*
-7	\N	patients	create	{}	{}	\N	*
-8	\N	pharmacist	create	{}	{}	\N	*
-9	\N	pharmacist	read	{}	{}	\N	*
 10	d6c8e3e4-8750-4a8f-a459-3a3294f06361	directus_files	create	{}	\N	\N	*
 11	d6c8e3e4-8750-4a8f-a459-3a3294f06361	directus_files	read	{}	\N	\N	*
 12	d6c8e3e4-8750-4a8f-a459-3a3294f06361	directus_files	update	{}	\N	\N	*
@@ -1443,10 +1408,6 @@ COPY public.directus_permissions (id, role, collection, action, permissions, val
 31	d6c8e3e4-8750-4a8f-a459-3a3294f06361	directus_shares	update	{"user_created":{"_eq":"$CURRENT_USER"}}	\N	\N	*
 32	d6c8e3e4-8750-4a8f-a459-3a3294f06361	directus_shares	delete	{"user_created":{"_eq":"$CURRENT_USER"}}	\N	\N	*
 33	d6c8e3e4-8750-4a8f-a459-3a3294f06361	directus_flows	read	{"trigger":{"_eq":"manual"}}	\N	\N	id,name,icon,color,options,trigger
-34	d6c8e3e4-8750-4a8f-a459-3a3294f06361	patients	create	{}	{}	\N	*
-35	d6c8e3e4-8750-4a8f-a459-3a3294f06361	patients	read	{}	{}	\N	*
-36	d6c8e3e4-8750-4a8f-a459-3a3294f06361	patients	update	{}	{}	\N	*
-37	d6c8e3e4-8750-4a8f-a459-3a3294f06361	patients	delete	{}	{}	\N	*
 \.
 
 
@@ -1455,12 +1416,8 @@ COPY public.directus_permissions (id, role, collection, action, permissions, val
 --
 
 COPY public.directus_presets (id, bookmark, "user", role, collection, search, layout, layout_query, layout_options, refresh_interval, filter, icon, color) FROM stdin;
-14	\N	b76f063d-86b5-421a-b985-6f4e0885eb66	\N	prescriptions	\N	tabular	{"tabular":{"fields":["date_created","dosage","drug_name","frequency","patient_id"],"page":1}}	{"tabular":{"widths":{"date_created":357.734375,"patient_id":698.46484375},"spacing":"comfortable"},"calendar":{"viewInfo":{"type":"dayGridMonth","startDateStr":"2022-12-01T00:00:00+08:00"},"template":"{{patient_id}}","startDateField":"date_created","endDateField":"date_created","firstDay":0},"cards":{"title":"{{patient_id}}"}}	\N	{"_and":[{"date_created":{"_lt":"2022-12-26T12:00:00+08:00"}}]}	bookmark_outline	\N
 10	\N	b76f063d-86b5-421a-b985-6f4e0885eb66	\N	directus_files	\N	cards	{"cards":{"sort":["-uploaded_on"],"page":1}}	{"cards":{"icon":"insert_drive_file","title":"{{ title }}","subtitle":"{{ type }} • {{ filesize }}","size":4,"imageFit":"crop"}}	\N	\N	bookmark_outline	\N
-12	\N	b76f063d-86b5-421a-b985-6f4e0885eb66	\N	doctors	\N	cards	{"tabular":{"fields":["name","age","contact_info","gender","status"]},"cards":{"page":1}}	{"tabular":{"widths":{}},"cards":{"title":"{{name}}","subtitle":"{{age}} ","size":5}}	\N	\N	bookmark_outline	\N
-15	\N	b76f063d-86b5-421a-b985-6f4e0885eb66	\N	patients	\N	\N	{"tabular":{"page":1,"fields":["name","age","contact_info","gender"]}}	{"tabular":{"widths":{"contact_info":602.4453125}}}	\N	\N	bookmark_outline	\N
 1	\N	b76f063d-86b5-421a-b985-6f4e0885eb66	\N	directus_users	\N	cards	{"cards":{"sort":["email"],"page":1}}	{"cards":{"icon":"account_circle","title":"{{ first_name }} {{ last_name }}","subtitle":"{{ email }}","size":4}}	\N	\N	bookmark_outline	\N
-13	\N	b76f063d-86b5-421a-b985-6f4e0885eb66	\N	pharmacist	\N	cards	{"tabular":{"page":1}}	{"cards":{"title":"{{name}}","subtitle":"{{gender}}"}}	\N	\N	bookmark_outline	\N
 \.
 
 
@@ -1469,10 +1426,6 @@ COPY public.directus_presets (id, bookmark, "user", role, collection, search, la
 --
 
 COPY public.directus_relations (id, many_collection, many_field, one_collection, one_field, one_collection_field, one_allowed_collections, junction_field, sort_field, one_deselect_action) FROM stdin;
-3	doctors	user_updated	directus_users	\N	\N	\N	\N	\N	nullify
-4	doctors	user_created	directus_users	\N	\N	\N	\N	\N	nullify
-5	doctors	profile	directus_files	\N	\N	\N	\N	\N	nullify
-6	pharmacist	pp	directus_users	\N	\N	\N	\N	\N	nullify
 \.
 
 
@@ -1563,7 +1516,6 @@ COPY public.directus_revisions (id, activity, collection, item, data, delta, par
 81	103	directus_fields	38	{"special":null,"collection":"patients","field":"name"}	{"special":null,"collection":"patients","field":"name"}	\N
 82	104	directus_fields	39	{"special":null,"collection":"patients","field":"gender"}	{"special":null,"collection":"patients","field":"gender"}	\N
 83	105	directus_fields	40	{"special":null,"collection":"patients","field":"contact_info"}	{"special":null,"collection":"patients","field":"contact_info"}	\N
-84	106	patients	1	{"age":18,"name":"ad","gender":"2"}	{"age":18,"name":"ad","gender":"2"}	\N
 85	108	directus_fields	39	{"id":39,"collection":"patients","field":"gender","special":null,"interface":"select-dropdown","options":{"choices":[{"text":"man","value":"0"},{"text":"woman","value":"1"},{"text":"other","value":"2"}]},"display":null,"display_options":null,"readonly":false,"hidden":false,"sort":null,"width":"full","translations":null,"note":null,"conditions":null,"required":false,"group":null,"validation":null,"validation_message":null}	{"collection":"patients","field":"gender","special":null,"interface":"select-dropdown","options":{"choices":[{"text":"man","value":"0"},{"text":"woman","value":"1"},{"text":"other","value":"2"}]},"display":null,"display_options":null,"readonly":false,"hidden":false,"sort":null,"width":"full","translations":null,"note":null,"conditions":null,"required":false,"group":null,"validation":null,"validation_message":null}	\N
 86	109	directus_settings	1	{"id":1,"project_name":"DBMS","project_url":null,"project_color":null,"project_logo":"ba3f1be0-8670-434e-81cd-c4718443b45f","public_foreground":null,"public_background":null,"public_note":null,"auth_login_attempts":25,"auth_password_policy":null,"storage_asset_transform":"all","storage_asset_presets":null,"custom_css":null,"storage_default_folder":null,"basemaps":null,"mapbox_key":null,"module_bar":null,"project_descriptor":null,"translation_strings":null,"default_language":"en-US","custom_aspect_ratios":null}	{"project_name":"DBMS"}	\N
 87	110	directus_collections	pharmacist	{"collection":"pharmacist"}	{"collection":"pharmacist"}	\N
@@ -1573,7 +1525,6 @@ COPY public.directus_revisions (id, activity, collection, item, data, delta, par
 91	114	directus_fields	43	{"special":null,"collection":"pharmacist","field":"gender"}	{"special":null,"collection":"pharmacist","field":"gender"}	\N
 92	115	directus_fields	44	{"special":null,"collection":"pharmacist","field":"age"}	{"special":null,"collection":"pharmacist","field":"age"}	\N
 93	116	directus_fields	45	{"special":null,"collection":"pharmacist","field":"contact_info"}	{"special":null,"collection":"pharmacist","field":"contact_info"}	\N
-94	117	pharmacist	1	{"name":"藥師一號","gender":"0","age":30}	{"name":"藥師一號","gender":"0","age":30}	\N
 95	118	directus_permissions	6	{"role":null,"collection":"patients","action":"read","fields":["*"],"permissions":{},"validation":{}}	{"role":null,"collection":"patients","action":"read","fields":["*"],"permissions":{},"validation":{}}	\N
 96	119	directus_permissions	7	{"role":null,"collection":"patients","action":"create","fields":["*"],"permissions":{},"validation":{}}	{"role":null,"collection":"patients","action":"create","fields":["*"],"permissions":{},"validation":{}}	\N
 97	120	directus_permissions	8	{"role":null,"collection":"pharmacist","action":"create","fields":["*"],"permissions":{},"validation":{}}	{"role":null,"collection":"pharmacist","action":"create","fields":["*"],"permissions":{},"validation":{}}	\N
@@ -1601,13 +1552,10 @@ COPY public.directus_revisions (id, activity, collection, item, data, delta, par
 119	142	directus_fields	33	{"id":33,"collection":"doctors","field":"name","special":null,"interface":"input","options":null,"display":null,"display_options":null,"readonly":false,"hidden":false,"sort":9,"width":"full","translations":null,"note":null,"conditions":null,"required":true,"group":null,"validation":null,"validation_message":null}	{"collection":"doctors","field":"name","sort":9,"group":null}	\N
 120	143	directus_fields	34	{"id":34,"collection":"doctors","field":"gender","special":null,"interface":"select-dropdown","options":{"choices":[{"text":"man","value":0},{"text":"woman","value":1},{"text":"other","value":2}]},"display":null,"display_options":null,"readonly":false,"hidden":false,"sort":10,"width":"full","translations":null,"note":null,"conditions":null,"required":false,"group":null,"validation":null,"validation_message":null}	{"collection":"doctors","field":"gender","sort":10,"group":null}	\N
 121	144	directus_fields	35	{"id":35,"collection":"doctors","field":"profile","special":["file"],"interface":"file-image","options":null,"display":null,"display_options":null,"readonly":false,"hidden":false,"sort":11,"width":"full","translations":null,"note":null,"conditions":null,"required":false,"group":null,"validation":null,"validation_message":null}	{"collection":"doctors","field":"profile","sort":11,"group":null}	\N
-122	145	patients	2	{"age":18,"name":"ピノコ","gender":"1","contact_info":"https://zh.m.wikipedia.org/zh-tw/%E7%9A%AE%E8%AB%BE%E5%8F%AF"}	{"age":18,"name":"ピノコ","gender":"1","contact_info":"https://zh.m.wikipedia.org/zh-tw/%E7%9A%AE%E8%AB%BE%E5%8F%AF"}	\N
-123	146	prescriptions	1	{"patient_id":2,"drug_name":"安眠藥","dosage":1,"frequency":"一週一次","date_created":"2022-12-25T04:00:00.000Z"}	{"patient_id":2,"drug_name":"安眠藥","dosage":1,"frequency":"一週一次","date_created":"2022-12-25T04:00:00.000Z"}	\N
 137	160	directus_permissions	15	{"collection":"directus_dashboards","action":"read","permissions":{},"fields":["*"],"role":"d6c8e3e4-8750-4a8f-a459-3a3294f06361"}	{"collection":"directus_dashboards","action":"read","permissions":{},"fields":["*"],"role":"d6c8e3e4-8750-4a8f-a459-3a3294f06361"}	\N
 138	161	directus_permissions	16	{"collection":"directus_dashboards","action":"update","permissions":{},"fields":["*"],"role":"d6c8e3e4-8750-4a8f-a459-3a3294f06361"}	{"collection":"directus_dashboards","action":"update","permissions":{},"fields":["*"],"role":"d6c8e3e4-8750-4a8f-a459-3a3294f06361"}	\N
 124	147	directus_fields	47	{"id":47,"collection":"prescriptions","field":"patient_id","special":null,"interface":"select-dropdown-m2o","options":{"template":"{{patient_id}}"},"display":"related-values","display_options":{"template":"{{name}}{{gender}}{{age}}{{contact_info}}"},"readonly":false,"hidden":false,"sort":null,"width":"full","translations":null,"note":null,"conditions":null,"required":false,"group":null,"validation":null,"validation_message":null}	{"collection":"prescriptions","field":"patient_id","special":null,"interface":"select-dropdown-m2o","options":{"template":"{{patient_id}}"},"display":"related-values","display_options":{"template":"{{name}}{{gender}}{{age}}{{contact_info}}"},"readonly":false,"hidden":false,"sort":null,"width":"full","translations":null,"note":null,"conditions":null,"required":false,"group":null,"validation":null,"validation_message":null}	\N
 125	148	directus_fields	47	{"id":47,"collection":"prescriptions","field":"patient_id","special":null,"interface":"select-dropdown-m2o","options":{"template":"{{patient_id}} {{name}}"},"display":"related-values","display_options":{"template":"{{name}}{{gender}}{{age}}{{contact_info}}"},"readonly":false,"hidden":false,"sort":null,"width":"full","translations":null,"note":null,"conditions":null,"required":false,"group":null,"validation":null,"validation_message":null}	{"collection":"prescriptions","field":"patient_id","special":null,"interface":"select-dropdown-m2o","options":{"template":"{{patient_id}} {{name}}"},"display":"related-values","display_options":{"template":"{{name}}{{gender}}{{age}}{{contact_info}}"},"readonly":false,"hidden":false,"sort":null,"width":"full","translations":null,"note":null,"conditions":null,"required":false,"group":null,"validation":null,"validation_message":null}	\N
-126	149	prescriptions	1	{"prescription_id":1,"patient_id":2,"drug_name":"安眠藥","dosage":1,"frequency":"一週一次","date_created":"2022-12-25T04:00:00.000Z"}	{"date_created":"2022-12-25T04:00:00.000Z"}	\N
 127	150	directus_fields	47	{"id":47,"collection":"prescriptions","field":"patient_id","special":null,"interface":null,"options":{"template":"{{patient_id}} {{name}}"},"display":"related-values","display_options":{"template":"{{name}}{{gender}}{{age}}{{contact_info}}"},"readonly":false,"hidden":false,"sort":null,"width":"full","translations":null,"note":null,"conditions":null,"required":false,"group":null,"validation":null,"validation_message":null}	{"collection":"prescriptions","field":"patient_id","special":null,"interface":null,"options":{"template":"{{patient_id}} {{name}}"},"display":"related-values","display_options":{"template":"{{name}}{{gender}}{{age}}{{contact_info}}"},"readonly":false,"hidden":false,"sort":null,"width":"full","translations":null,"note":null,"conditions":null,"required":false,"group":null,"validation":null,"validation_message":null}	\N
 128	151	directus_fields	47	{"id":47,"collection":"prescriptions","field":"patient_id","special":null,"interface":"select-dropdown-m2o","options":{"template":"{{patient_id}} {{name}} ","enableCreate":false,"enableSelect":false},"display":"related-values","display_options":{"template":"{{name}}{{gender}}{{age}}{{contact_info}}"},"readonly":false,"hidden":false,"sort":null,"width":"full","translations":null,"note":null,"conditions":null,"required":false,"group":null,"validation":null,"validation_message":null}	{"collection":"prescriptions","field":"patient_id","special":null,"interface":"select-dropdown-m2o","options":{"template":"{{patient_id}} {{name}} ","enableCreate":false,"enableSelect":false},"display":"related-values","display_options":{"template":"{{name}}{{gender}}{{age}}{{contact_info}}"},"readonly":false,"hidden":false,"sort":null,"width":"full","translations":null,"note":null,"conditions":null,"required":false,"group":null,"validation":null,"validation_message":null}	\N
 129	152	directus_fields	47	{"id":47,"collection":"prescriptions","field":"patient_id","special":null,"interface":"select-dropdown-m2o","options":{"template":"{{patient_id}} {{name}} ","enableCreate":false},"display":"related-values","display_options":{"template":"{{name}}{{gender}}{{age}}{{contact_info}}"},"readonly":false,"hidden":false,"sort":null,"width":"full","translations":null,"note":null,"conditions":null,"required":false,"group":null,"validation":null,"validation_message":null}	{"collection":"prescriptions","field":"patient_id","special":null,"interface":"select-dropdown-m2o","options":{"template":"{{patient_id}} {{name}} ","enableCreate":false},"display":"related-values","display_options":{"template":"{{name}}{{gender}}{{age}}{{contact_info}}"},"readonly":false,"hidden":false,"sort":null,"width":"full","translations":null,"note":null,"conditions":null,"required":false,"group":null,"validation":null,"validation_message":null}	\N
@@ -1647,13 +1595,11 @@ COPY public.directus_revisions (id, activity, collection, item, data, delta, par
 165	196	directus_permissions	36	{"role":"d6c8e3e4-8750-4a8f-a459-3a3294f06361","collection":"patients","action":"update","fields":["*"],"permissions":{},"validation":{}}	{"role":"d6c8e3e4-8750-4a8f-a459-3a3294f06361","collection":"patients","action":"update","fields":["*"],"permissions":{},"validation":{}}	\N
 166	197	directus_permissions	37	{"role":"d6c8e3e4-8750-4a8f-a459-3a3294f06361","collection":"patients","action":"delete","fields":["*"],"permissions":{},"validation":{}}	{"role":"d6c8e3e4-8750-4a8f-a459-3a3294f06361","collection":"patients","action":"delete","fields":["*"],"permissions":{},"validation":{}}	\N
 167	198	directus_fields	53	{"interface":"select-dropdown-m2o","special":["m2o"],"options":{"choices":null,"filter":{"_and":[{"role":{"name":{"_contains":"Pharmacist"}}}]}},"collection":"pharmacist","field":"pp"}	{"interface":"select-dropdown-m2o","special":["m2o"],"options":{"choices":null,"filter":{"_and":[{"role":{"name":{"_contains":"Pharmacist"}}}]}},"collection":"pharmacist","field":"pp"}	\N
-168	199	pharmacist	1	{"pharmacist_id":1,"name":"藥師一號","gender":"0","age":30,"contact_info":null,"pp":"36329cc9-42f6-4f3c-b316-f55d29bec75b"}	{"pp":"36329cc9-42f6-4f3c-b316-f55d29bec75b"}	\N
 169	200	directus_permissions	38	{"role":null,"collection":"directus_sessions","action":"read"}	{"role":null,"collection":"directus_sessions","action":"read"}	\N
 170	201	directus_permissions	38	{"id":38,"role":null,"collection":"directus_sessions","action":"read","permissions":{"_and":[{"user":{"role":{"name":{"_contains":"pharmacist"}}}}]},"validation":null,"presets":null,"fields":null}	{"role":null,"collection":"directus_sessions","action":"read","permissions":{"_and":[{"user":{"role":{"name":{"_contains":"pharmacist"}}}}]},"validation":null,"presets":null,"fields":null}	\N
 171	203	directus_collections	prescriptions	{"collection":"prescriptions","icon":null,"note":null,"display_template":"{{patient_id}}","hidden":false,"singleton":false,"translations":null,"archive_field":null,"archive_app_filter":true,"archive_value":null,"unarchive_value":null,"sort_field":null,"accountability":"all","color":null,"item_duplication_fields":["patient_id"],"sort":null,"group":null,"collapse":"open"}	{"display_template":"{{patient_id}}","item_duplication_fields":["patient_id"]}	\N
 172	204	directus_fields	47	{"id":47,"collection":"prescriptions","field":"patient_id","special":null,"interface":"select-dropdown-m2o","options":{"template":"{{patient_id}} {{name}} "},"display":"related-values","display_options":{"template":"{{name}}  {{gender}}"},"readonly":false,"hidden":false,"sort":null,"width":"full","translations":null,"note":null,"conditions":null,"required":false,"group":null,"validation":null,"validation_message":null}	{"collection":"prescriptions","field":"patient_id","special":null,"interface":"select-dropdown-m2o","options":{"template":"{{patient_id}} {{name}} "},"display":"related-values","display_options":{"template":"{{name}}  {{gender}}"},"readonly":false,"hidden":false,"sort":null,"width":"full","translations":null,"note":null,"conditions":null,"required":false,"group":null,"validation":null,"validation_message":null}	\N
 173	205	directus_collections	prescriptions	{"collection":"prescriptions","icon":null,"note":null,"display_template":"{{patient_id}}{{prescription_id}}","hidden":false,"singleton":false,"translations":null,"archive_field":null,"archive_app_filter":true,"archive_value":null,"unarchive_value":null,"sort_field":null,"accountability":"all","color":null,"item_duplication_fields":["patient_id"],"sort":null,"group":null,"collapse":"open"}	{"display_template":"{{patient_id}}{{prescription_id}}"}	\N
-174	206	prescriptions	1	{"prescription_id":1,"patient_id":2,"drug_name":"安眠藥","dosage":4,"frequency":"一週一次","date_created":"2022-12-25T04:00:00.000Z"}	{"dosage":4,"date_created":"2022-12-25T04:00:00.000Z"}	\N
 175	207	directus_settings	1	{"id":1,"project_name":"DBMS","project_url":null,"project_color":null,"project_logo":"ba3f1be0-8670-434e-81cd-c4718443b45f","public_foreground":null,"public_background":null,"public_note":null,"auth_login_attempts":25,"auth_password_policy":null,"storage_asset_transform":"all","storage_asset_presets":null,"custom_css":null,"storage_default_folder":null,"basemaps":null,"mapbox_key":null,"module_bar":[{"type":"module","id":"content","enabled":true},{"type":"module","id":"users","enabled":true},{"type":"module","id":"files","enabled":true},{"type":"module","id":"insights","enabled":true},{"type":"module","id":"docs","enabled":false},{"type":"module","id":"settings","enabled":true,"locked":true}],"project_descriptor":null,"translation_strings":null,"default_language":"en-US","custom_aspect_ratios":null}	{"module_bar":[{"type":"module","id":"content","enabled":true},{"type":"module","id":"users","enabled":true},{"type":"module","id":"files","enabled":true},{"type":"module","id":"insights","enabled":true},{"type":"module","id":"docs","enabled":false},{"type":"module","id":"settings","enabled":true,"locked":true}]}	\N
 176	208	directus_fields	47	{"id":47,"collection":"prescriptions","field":"patient_id","special":null,"interface":"select-dropdown-m2o","options":{"template":"{{patient_id}} {{name}} "},"display":"related-values","display_options":{"template":"{{name}}  {{gender}}"},"readonly":false,"hidden":false,"sort":null,"width":"half","translations":null,"note":null,"conditions":null,"required":false,"group":null,"validation":null,"validation_message":null}	{"collection":"prescriptions","field":"patient_id","width":"half"}	\N
 177	209	directus_fields	47	{"id":47,"collection":"prescriptions","field":"patient_id","special":null,"interface":"select-dropdown-m2o","options":{"template":"{{patient_id}} {{name}} "},"display":"related-values","display_options":{"template":"{{name}}  {{gender}}"},"readonly":false,"hidden":false,"sort":null,"width":"fill","translations":null,"note":null,"conditions":null,"required":false,"group":null,"validation":null,"validation_message":null}	{"collection":"prescriptions","field":"patient_id","width":"fill"}	\N
@@ -1686,6 +1632,7 @@ d6c8e3e4-8750-4a8f-a459-3a3294f06361	Pharmacist	accessibility_new	\N	\N	f	f	t
 COPY public.directus_sessions (token, "user", expires, ip, user_agent, share, origin) FROM stdin;
 IAsE6rRloZ_c26rgGAff4LSJQYrmUkv-z2hOsqeavQ32UQ2i2PJSbRGRPSQ2hwSQ	b76f063d-86b5-421a-b985-6f4e0885eb66	2023-01-01 12:39:22.295+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	\N	http://localhost:8055
 BQ9EenP8o5GCb64-2ANPwGBaXNBIAIUlocGq7SE259YWjxogKr7Q0-fBhzg9CnO-	b76f063d-86b5-421a-b985-6f4e0885eb66	2023-01-01 12:49:23.355+00	127.0.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	\N	http://0.0.0.0:8055
+YnQFBxfSsPLz7amaU9ZBVuIKFAuKE2_PIgFLZGIMG9WdtWHXFQjUFUEncbXGYEyI	b76f063d-86b5-421a-b985-6f4e0885eb66	2023-01-05 10:51:22.411+00	172.21.0.1	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36	\N	http://0.0.0.0:8055
 \.
 
 
@@ -1712,7 +1659,7 @@ COPY public.directus_shares (id, name, collection, item, role, password, user_cr
 
 COPY public.directus_users (id, first_name, last_name, email, password, location, title, description, tags, avatar, language, theme, tfa_secret, status, role, token, last_access, last_page, provider, external_identifier, auth_data, email_notifications) FROM stdin;
 36329cc9-42f6-4f3c-b316-f55d29bec75b	Aiden	B	aiden@oly.com	$argon2id$v=19$m=65536,t=3,p=4$fve/QgDi7rXc0vRH1K7M/Q$YWQdHGlQzxMuvtpRnW5X9elw8i9cpobzWicz2tysiIw	\N	\N	\N	\N	\N	zh-TW	light	\N	active	d6c8e3e4-8750-4a8f-a459-3a3294f06361	\N	2022-12-25 11:40:47.288+00	/users/roles/f6170ecc-3150-468d-8dda-799b64af4e1b	default	\N	\N	f
-b76f063d-86b5-421a-b985-6f4e0885eb66	Admin	User	aidenzich0221@gmail.com	$argon2id$v=19$m=65536,t=3,p=4$8tZVQW26rXlNt0aoeLNbag$RxJqxaC+XukKaUYqVLJLGuhH8cBYL4rKtU7yd3Umvyc	\N	\N	\N	\N	\N	\N	auto	\N	active	f6170ecc-3150-468d-8dda-799b64af4e1b	\N	2022-12-25 12:49:23.375+00	/settings/data-model	default	\N	\N	t
+b76f063d-86b5-421a-b985-6f4e0885eb66	Admin	User	aidenzich0221@gmail.com	$argon2id$v=19$m=65536,t=3,p=4$8tZVQW26rXlNt0aoeLNbag$RxJqxaC+XukKaUYqVLJLGuhH8cBYL4rKtU7yd3Umvyc	\N	\N	\N	\N	\N	\N	auto	\N	active	f6170ecc-3150-468d-8dda-799b64af4e1b	\N	2022-12-29 10:51:22.42+00	/settings/data-model	default	\N	\N	t
 \.
 
 
@@ -1728,9 +1675,53 @@ COPY public.directus_webhooks (id, name, method, url, status, data, actions, col
 -- Data for Name: doctors; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.doctors (doctor_id, status, user_created, date_created, user_updated, date_updated, age, contact_info, name, gender, profile) FROM stdin;
-2	draft	\N	2022-12-25 09:24:42.738+00	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 09:26:36.495+00	30	\N	abc	1	\N
-1	published	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 09:22:01.331+00	b76f063d-86b5-421a-b985-6f4e0885eb66	2022-12-25 09:29:37.312+00	34	https://zh.m.wikipedia.org/zh-tw/%E9%BB%91%E5%82%91%E5%85%8B	Black Jack	0	867bceb2-8601-42a5-9688-965ee6c9f0bc
+COPY public.doctors (doctor_id, name, gender, age, contact_info) FROM stdin;
+1	Dr. David Taylor	M	45	david.taylor@example.com
+2	Dr. Sarah Jackson	F	38	sarah.jackson@example.com
+3	Dr. Michael Rodriguez	M	41	michael.rodriguez@example.com
+4	Dr. Jessica Williams	F	35	jessica.williams@example.com
+5	Dr. John Davis	M	34	john.davis@example.com
+6	Dr. Elizabeth Johnson	F	28	elizabeth.johnson@example.com
+7	Dr. William Smith	M	42	william.smith@example.com
+8	Dr. Sophia Thompson	F	30	sophia.thompson@example.com
+9	Dr. Michael Brown	M	37	michael.brown@example.com
+10	Dr. Jane Anderson	F	29	jane.anderson@example.com
+\.
+
+
+--
+-- Data for Name: drug_stocks; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.drug_stocks (drug_id, drug_name, quantity, price, batch_number, expiration_date) FROM stdin;
+1	Flu medication	100	10.99	F1	2022-12-01
+2	Pain medication	200	5.99	P1	2022-11-01
+3	Headache medication	300	8.99	H1	2022-10-01
+4	Allergy medication	400	15.99	A1	2022-09-01
+5	Antacids	500	4.99	T1	2022-08-01
+6	Cold medication	600	12.99	C1	2022-07-01
+7	Stomachache medication	700	7.99	S1	2022-06-01
+8	Anxiety medication	800	20.99	N1	2022-05-01
+9	Sleeping pills	900	9.99	L1	2022-04-01
+10	Antihistamines	1000	14.99	H1	2022-03-01
+\.
+
+
+--
+-- Data for Name: medical_records; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.medical_records (record_id, patient_id, doctor_id, diagnosis, treatment_plan, date_created) FROM stdin;
+1	1	1	Flu	Take flu medication and rest	2022-12-29 10:51:15.155176+00
+2	2	2	Sore throat	Take pain medication and drink warm liquids	2022-12-29 10:51:15.155176+00
+3	3	3	Headache	Take headache medication and avoid stress	2022-12-29 10:51:15.155176+00
+4	4	4	Allergies	Take allergy medication and avoid allergens	2022-12-29 10:51:15.155176+00
+5	5	5	Stomachache	Take antacids and avoid spicy food	2022-12-29 10:51:15.155176+00
+6	6	6	Cold	Take cold medication and rest	2022-12-29 10:51:15.155176+00
+7	7	7	Back pain	Take pain medication and rest	2022-12-29 10:51:15.155176+00
+8	8	8	Cold	Take cold medication and rest	2022-12-29 10:51:15.155176+00
+9	9	9	Cold	Take cold medication and rest	2022-12-29 10:51:15.155176+00
+10	10	10	Cold	Take cold medication and rest	2022-12-29 10:51:15.155176+00
 \.
 
 
@@ -1739,16 +1730,16 @@ COPY public.doctors (doctor_id, status, user_created, date_created, user_updated
 --
 
 COPY public.patients (patient_id, name, gender, age, contact_info) FROM stdin;
-2	ピノコ	1	18	https://zh.m.wikipedia.org/zh-tw/%E7%9A%AE%E8%AB%BE%E5%8F%AF
-\.
-
-
---
--- Data for Name: pharmacist; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.pharmacist (pharmacist_id, name, gender, age, contact_info, pp) FROM stdin;
-1	藥師一號	0	30	\N	36329cc9-42f6-4f3c-b316-f55d29bec75b
+1	John Smith	M	35	john.smith@example.com
+2	Jane Doe	F	28	jane.doe@example.com
+3	Michael Johnson	M	42	michael.johnson@example.com
+4	Sophia Williams	F	31	sophia.williams@example.com
+5	David Brown	M	29	david.brown@example.com
+6	Emily Davis	F	26	emily.davis@example.com
+7	William Thompson	M	32	william.thompson@example.com
+8	Elizabeth Johnson	F	24	elizabeth.johnson@example.com
+9	James Rodriguez	M	37	james.rodriguez@example.com
+10	Laura Anderson	F	30	laura.anderson@example.com
 \.
 
 
@@ -1757,7 +1748,34 @@ COPY public.pharmacist (pharmacist_id, name, gender, age, contact_info, pp) FROM
 --
 
 COPY public.prescriptions (prescription_id, patient_id, drug_name, dosage, frequency, date_created) FROM stdin;
-1	2	安眠藥	4	一週一次	2022-12-25 04:00:00+00
+1	1	Flu medication	2	twice daily	2022-12-29 10:51:15.186981+00
+2	2	Pain medication	1	as needed	2022-12-29 10:51:15.186981+00
+3	3	Headache medication	1	twice daily	2022-12-29 10:51:15.186981+00
+4	4	Allergy medication	1	twice daily	2022-12-29 10:51:15.186981+00
+5	5	Antacids	2	twice daily	2022-12-29 10:51:15.186981+00
+6	6	Cold medication	1	twice daily	2022-12-29 10:51:15.186981+00
+7	7	Pain medication	1	as needed	2022-12-29 10:51:15.186981+00
+8	8	Allergy medication	1	twice daily	2022-12-29 10:51:15.186981+00
+9	9	Headache medication	1	twice daily	2022-12-29 10:51:15.186981+00
+10	10	Flu medication	2	twice daily	2022-12-29 10:51:15.186981+00
+\.
+
+
+--
+-- Data for Name: sales; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.sales (sale_id, drug_id, quantity, price, total_amount, date_created) FROM stdin;
+1	1	10	10.99	109.9	2022-12-29 10:51:15.209882+00
+2	2	20	5.99	119.8	2022-12-29 10:51:15.209882+00
+3	3	30	8.99	269.7	2022-12-29 10:51:15.209882+00
+4	4	40	15.99	639.6	2022-12-29 10:51:15.209882+00
+5	5	50	4.99	249.5	2022-12-29 10:51:15.209882+00
+6	6	60	12.99	777.4	2022-12-29 10:51:15.209882+00
+7	7	70	7.99	559.3	2022-12-29 10:51:15.209882+00
+8	8	80	20.99	1679.2	2022-12-29 10:51:15.209882+00
+9	9	90	9.99	899.1	2022-12-29 10:51:15.209882+00
+10	10	100	14.99	1499	2022-12-29 10:51:15.209882+00
 \.
 
 
@@ -1770,58 +1788,10 @@ COPY public.spatial_ref_sys (srid, auth_name, auth_srid, srtext, proj4text) FROM
 
 
 --
--- Data for Name: geocode_settings; Type: TABLE DATA; Schema: tiger; Owner: postgres
---
-
-COPY tiger.geocode_settings (name, setting, unit, category, short_desc) FROM stdin;
-\.
-
-
---
--- Data for Name: pagc_gaz; Type: TABLE DATA; Schema: tiger; Owner: postgres
---
-
-COPY tiger.pagc_gaz (id, seq, word, stdword, token, is_custom) FROM stdin;
-\.
-
-
---
--- Data for Name: pagc_lex; Type: TABLE DATA; Schema: tiger; Owner: postgres
---
-
-COPY tiger.pagc_lex (id, seq, word, stdword, token, is_custom) FROM stdin;
-\.
-
-
---
--- Data for Name: pagc_rules; Type: TABLE DATA; Schema: tiger; Owner: postgres
---
-
-COPY tiger.pagc_rules (id, rule, is_custom) FROM stdin;
-\.
-
-
---
--- Data for Name: topology; Type: TABLE DATA; Schema: topology; Owner: postgres
---
-
-COPY topology.topology (id, name, srid, "precision", hasz) FROM stdin;
-\.
-
-
---
--- Data for Name: layer; Type: TABLE DATA; Schema: topology; Owner: postgres
---
-
-COPY topology.layer (topology_id, layer_id, schema_name, table_name, feature_column, feature_type, level, child_id) FROM stdin;
-\.
-
-
---
 -- Name: directus_activity_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.directus_activity_id_seq', 218, true);
+SELECT pg_catalog.setval('public.directus_activity_id_seq', 223, true);
 
 
 --
@@ -1884,28 +1854,42 @@ SELECT pg_catalog.setval('public.directus_webhooks_id_seq', 1, false);
 -- Name: doctors_doctor_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.doctors_doctor_id_seq', 2, true);
+SELECT pg_catalog.setval('public.doctors_doctor_id_seq', 10, true);
+
+
+--
+-- Name: drug_stocks_drug_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.drug_stocks_drug_id_seq', 10, true);
+
+
+--
+-- Name: medical_records_record_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.medical_records_record_id_seq', 10, true);
 
 
 --
 -- Name: patients_patient_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.patients_patient_id_seq', 2, true);
-
-
---
--- Name: pharmacist_pharmacist_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public.pharmacist_pharmacist_id_seq', 1, true);
+SELECT pg_catalog.setval('public.patients_patient_id_seq', 10, true);
 
 
 --
 -- Name: prescriptions_prescription_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.prescriptions_prescription_id_seq', 1, true);
+SELECT pg_catalog.setval('public.prescriptions_prescription_id_seq', 10, true);
+
+
+--
+-- Name: sales_sale_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.sales_sale_id_seq', 10, true);
 
 
 --
@@ -2133,6 +2117,22 @@ ALTER TABLE ONLY public.doctors
 
 
 --
+-- Name: drug_stocks drug_stocks_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.drug_stocks
+    ADD CONSTRAINT drug_stocks_pkey PRIMARY KEY (drug_id);
+
+
+--
+-- Name: medical_records medical_records_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.medical_records
+    ADD CONSTRAINT medical_records_pkey PRIMARY KEY (record_id);
+
+
+--
 -- Name: patients patients_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2141,19 +2141,19 @@ ALTER TABLE ONLY public.patients
 
 
 --
--- Name: pharmacist pharmacist_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.pharmacist
-    ADD CONSTRAINT pharmacist_pkey PRIMARY KEY (pharmacist_id);
-
-
---
 -- Name: prescriptions prescriptions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.prescriptions
     ADD CONSTRAINT prescriptions_pkey PRIMARY KEY (prescription_id);
+
+
+--
+-- Name: sales sales_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.sales
+    ADD CONSTRAINT sales_pkey PRIMARY KEY (sale_id);
 
 
 --
@@ -2397,35 +2397,19 @@ ALTER TABLE ONLY public.directus_users
 
 
 --
--- Name: doctors doctors_profile_foreign; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: medical_records medical_records_doctor_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.doctors
-    ADD CONSTRAINT doctors_profile_foreign FOREIGN KEY (profile) REFERENCES public.directus_files(id) ON DELETE SET NULL;
-
-
---
--- Name: doctors doctors_user_created_foreign; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.doctors
-    ADD CONSTRAINT doctors_user_created_foreign FOREIGN KEY (user_created) REFERENCES public.directus_users(id);
+ALTER TABLE ONLY public.medical_records
+    ADD CONSTRAINT medical_records_doctor_id_fkey FOREIGN KEY (doctor_id) REFERENCES public.doctors(doctor_id);
 
 
 --
--- Name: doctors doctors_user_updated_foreign; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: medical_records medical_records_patient_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.doctors
-    ADD CONSTRAINT doctors_user_updated_foreign FOREIGN KEY (user_updated) REFERENCES public.directus_users(id);
-
-
---
--- Name: pharmacist pharmacist_pp_foreign; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.pharmacist
-    ADD CONSTRAINT pharmacist_pp_foreign FOREIGN KEY (pp) REFERENCES public.directus_users(id) ON DELETE SET NULL;
+ALTER TABLE ONLY public.medical_records
+    ADD CONSTRAINT medical_records_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.patients(patient_id);
 
 
 --
@@ -2434,6 +2418,14 @@ ALTER TABLE ONLY public.pharmacist
 
 ALTER TABLE ONLY public.prescriptions
     ADD CONSTRAINT prescriptions_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.patients(patient_id);
+
+
+--
+-- Name: sales sales_drug_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.sales
+    ADD CONSTRAINT sales_drug_id_fkey FOREIGN KEY (drug_id) REFERENCES public.drug_stocks(drug_id);
 
 
 --
