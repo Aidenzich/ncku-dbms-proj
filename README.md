@@ -1,4 +1,6 @@
 # DBMS Final Project
+姓名 葉家任
+學號 VS6102093
 ## Quick Start
 ```bash
 docker compose up -d
@@ -109,6 +111,6 @@ CREATE TABLE sales (
 ![](./docs/imgs/relation_schema.png)
 ## Backup data from postgreDB
 ```bash
-docker exec -it dbms-database-1 -n public pg_dump -U postgres directus > backup.sql 
+docker exec -it dbms-database-1 pg_dump -n public -U postgres directus  > backup.sql 
 ```
 

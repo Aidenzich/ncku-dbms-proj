@@ -26,7 +26,7 @@ CREATE TABLE medical_records (
 CREATE TABLE prescriptions (
   prescription_id SERIAL PRIMARY KEY,
   patient_id INTEGER REFERENCES patients (patient_id),
-  drug_name TEXT NOT NULL,
+  drug_id INTEGER REFERENCES drug_stocks (drug_id),
   dosage REAL NOT NULL,
   frequency TEXT NOT NULL,
   date_created TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP

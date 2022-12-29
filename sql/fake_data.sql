@@ -40,16 +40,16 @@ VALUES
 
 INSERT INTO prescriptions (patient_id, drug_name, dosage, frequency)
 VALUES
-  (1, 'Flu medication', 2, 'twice daily'),
-  (2, 'Pain medication', 1, 'as needed'),
-  (3, 'Headache medication', 1, 'twice daily'),
-  (4, 'Allergy medication', 1, 'twice daily'),
-  (5, 'Antacids', 2, 'twice daily'),
-  (6, 'Cold medication', 1, 'twice daily'),
-  (7, 'Pain medication', 1, 'as needed'),
-  (8, 'Allergy medication', 1, 'twice daily'),
-  (9, 'Headache medication', 1, 'twice daily'),
-  (10, 'Flu medication', 2, 'twice daily');
+  (1, 1, 2, 'twice daily'),
+  (2, 2, 1, 'as needed'),
+  (3, 3, 1, 'twice daily'),
+  (4, 4, 1, 'twice daily'),
+  (5, 5, 2, 'twice daily'),
+  (6, 6, 1, 'twice daily'),
+  (7, 7, 1, 'as needed'),
+  (8, 8, 1, 'twice daily'),
+  (9, 9, 1, 'twice daily'),
+  (10, 10, 2, 'twice daily');
 
 INSERT INTO drug_stocks (drug_name, quantity, price, batch_number, expiration_date)
 VALUES
