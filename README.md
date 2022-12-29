@@ -6,7 +6,12 @@ cd [project-name]
 npx directus start
 ```
 
-### Create custom endpoint
+### Run with Docker
+```
+docker compose up -d
+```
+
+## Create custom endpoint
 - 1. Going away of your directus project, and run below shell to create your extension for directus.
     ```bash
     yarn create directus-extension

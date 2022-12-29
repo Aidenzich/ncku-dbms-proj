@@ -3,10 +3,21 @@
 #     Password:      secret
 version: '3.1'
 services:
-  postgres:
+  database:
     image: postgis/postgis:13-3.1-alpine
     environment:
-      POSTGRES_PASSWORD: secret
-      POSTGRES_DB: directus
+      POSTGRES_PASSWORD: secret      
+      # POSTGRES_DB: directus
     ports:
       - 5432:5432
+    volumes:
+      - ./dummy_dump.sql:/docker-entrypoint-initdb.d/dummy_dump.sql
+  directus:
+    image: directus/directus:latest
+    ports:
+      - 8055:8055
+    env_file: ./dbms/.env
+    links:
+    - database
+    volumes:
+      - ./dbms/:/var/directus/
