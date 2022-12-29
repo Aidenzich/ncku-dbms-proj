@@ -1,1 +1,1 @@
-"use strict";module.exports=(e,{exceptions:t,database:s})=>{const{ServiceUnavailableException:o}=t;e.get("/hello",((e,t)=>t.send("Hello, World!"))),e.get("/test",((e,t)=>{let a=e.query.q;s.raw(a).then((e=>t.json(e.rows))).catch((e=>{throw new o(e.message)}))}))};
+"use strict";module.exports=(e,{exceptions:t,database:o})=>{e.get("/hello",((e,t)=>t.send("Hello, World!"))),e.get("/test",((e,t)=>{let l=e.query.q;o.raw(l).then((e=>t.json(e))).catch((e=>{console.log(e)}))}))};
