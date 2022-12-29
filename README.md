@@ -103,7 +103,7 @@ CREATE TABLE sales (
 - sales 表格記錄藥品銷售資料，包括銷售 ID、藥品 ID、數量、單價、總金額、建立日期等。
 
 ## EM Model
-![](./docs/imgs/DBMS.drawio.png)
+![](./docs/imgs/er_diagrams.png)
 
 ## Relation Schema
 ![](./docs/imgs/relation_schema.png)
